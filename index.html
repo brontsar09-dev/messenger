@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TSAREV Messenger | Звонки и видеозвонки</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0e1621;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 850px;
+            background: #17212b;
+            border-radius: 28px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        .header {
+            background: #1e2a36;
+            padding: 14px 16px;
+            border-bottom: 1px solid #2b3b4c;
+        }
+
+        .my-id-container {
+            background: #0e1621;
+            padding: 10px 14px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .my-id-label {
+            font-size: 12px;
+            color: #a9b6c2;
+        }
+
+        .my-id-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #5e9cf2;
+            font-family: monospace;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .copy-btn {
+            background: #5e9cf2;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .demo-badge {
+            background: #e8a020;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chats-sidebar {
+            width: 100%;
+            background: #17212b;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chats-sidebar.hidden {
+            display: none;
+        }
+
+        .chats-header {
+            padding: 16px;
+            border-bottom: 1px solid #2b3b4c;
+        }
+
+        .chats-header h3 {
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .add-chat-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .add-chat-form input {
+            flex: 1;
+            padding: 12px;
+            background: #0e1621;
+            border: 1px solid #2b3b4c;
+            border-radius: 30px;
+            color: white;
+            outline: none;
+        }
+
+        .add-chat-form button, .demo-btn {
+            background: #5e9cf2;
+            border: none;
+            padding: 0 18px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .demo-btn {
+            background: #e8a020;
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: #1e2a36;
+            margin-bottom: 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .chat-item.active {
+            background: #2b5278;
+        }
+
+        .chat-item:active {
+            background: #2b3b4c;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: #5e9cf2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .chat-last-msg {
+            font-size: 12px;
+            color: #a9b6c2;
+            margin-top: 4px;
+        }
+
+        .chat-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #17212b;
+        }
+
+        .chat-view.hidden {
+            display: none;
+        }
+
+        .chat-header {
+            padding: 12px 16px;
+            background: #1e2a36;
+            border-bottom: 1px solid #2b3b4c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #5e9cf2;
+        }
+
+        .chat-title {
+            flex: 1;
+            color: white;
+            font-weight: 600;
+            font-size: 17px;
+        }
+
+        .call-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .call-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #5e9cf2;
+            padding: 6px;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .message.out {
+            align-self: flex-end;
+        }
+
+        .message.in {
+            align-self: flex-start;
+        }
+
+        .bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 15px;
+            word-break: break-word;
+        }
+
+        .message.out .bubble {
+            background: #2b5278;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.in .bubble {
+            background: #1e2a36;
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 9px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .input-bar {
+            padding: 12px;
+            background: #1e2a36;
+            border-top: 1px solid #2b3b4c;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #0e1621;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .send-btn {
+            background: #5e9cf2;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* Модальное окно звонка */
+        .call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .call-modal.hidden {
+            display: none;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .remote-video {
+            width: 100%;
+            background: #000;
+            border-radius: 24px;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+        }
+
+        .local-video {
+            width: 100px;
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            border-radius: 16px;
+            border: 2px solid #5e9cf2;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .call-status {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .call-end-btn {
+            background: #ff4444;
+            border: none;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            font-size: 32px;
+            cursor: pointer;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 200;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #a9b6c2;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="my-id-container">
+            <span class="my-id-label">🆔 ТВОЙ ID:</span>
+            <span class="my-id-value" id="myIdValue">Загрузка...</span>
+            <button class="copy-btn" id="copyIdBtn">📋 Копировать</button>
+        </div>
+        <div id="demoBadgeContainer"></div>
+    </div>
+
+    <div class="main-layout">
+        <div id="chatsSidebar" class="chats-sidebar">
+            <div class="chats-header">
+                <h3>📱 Диалоги</h3>
+                <div class="add-chat-form">
+                    <input type="text" id="friendIdInput" placeholder="ID друга">
+                    <button id="addChatBtn">➕ Добавить</button>
+                </div>
+                <button class="demo-btn" id="demoModeBtn">🤖 Тест с ботом</button>
+            </div>
+            <div class="chats-list" id="chatsList">
+                <div class="empty-state">Нет диалогов<br>Добавьте друга по ID</div>
+            </div>
+        </div>
+
+        <div id="chatView" class="chat-view hidden">
+            <div class="chat-header">
+                <button class="back-btn" id="backBtn">←</button>
+                <div class="chat-title" id="chatTitle">Чат</div>
+                <div class="call-buttons">
+                    <button class="call-btn" id="audioCallBtn">📞</button>
+                    <button class="call-btn" id="videoCallBtn">📹</button>
+                </div>
+            </div>
+            <div class="messages-area" id="messagesArea"></div>
+            <div class="input-bar">
+                <input type="text" id="messageInput" placeholder="Сообщение..." autocomplete="off">
+                <button class="send-btn" id="sendBtn">➤</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="callModal" class="call-modal hidden">
+    <div class="video-container">
+        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+        <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+    </div>
+    <div class="call-status" id="callStatus">Звонок...</div>
+    <button class="call-end-btn" id="callEndBtn">📞</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    // ========== TSAREV МЕССЕНДЖЕР + ЗВОНКИ ==========
+    let peer = null;
+    let myId = null;
+    let isDemoMode = false;
+    let currentChatId = null;
+    
+    let chats = [];
+    
+    // Для звонков
+    let localStream = null;
+    let currentCall = null;
+    let isCallActive = false;
+    let isVideoCall = false;
+    
+    // DOM
+    const myIdValueSpan = document.getElementById('myIdValue');
+    const copyIdBtn = document.getElementById('copyIdBtn');
+    const chatsSidebar = document.getElementById('chatsSidebar');
+    const chatView = document.getElementById('chatView');
+    const chatsListDiv = document.getElementById('chatsList');
+    const messagesArea = document.getElementById('messagesArea');
+    const chatTitleSpan = document.getElementById('chatTitle');
+    const friendIdInput = document.getElementById('friendIdInput');
+    const addChatBtn = document.getElementById('addChatBtn');
+    const demoModeBtn = document.getElementById('demoModeBtn');
+    const backBtn = document.getElementById('backBtn');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const audioCallBtn = document.getElementById('audioCallBtn');
+    const videoCallBtn = document.getElementById('videoCallBtn');
+    const demoBadgeContainer = document.getElementById('demoBadgeContainer');
+    const toastEl = document.getElementById('toast');
+    const callModal = document.getElementById('callModal');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideo = document.getElementById('localVideo');
+    const callStatusSpan = document.getElementById('callStatus');
+    const callEndBtn = document.getElementById('callEndBtn');
+    
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.style.opacity = '1';
+        setTimeout(() => toastEl.style.opacity = '0', 2000);
+    }
+    
+    function saveChats() {
+        const toSave = chats.map(chat => ({
+            id: chat.id,
+            name: chat.name,
+            isBot: chat.isBot,
+            messages: chat.messages || []
+        }));
+        localStorage.setItem('tsarev_chats', JSON.stringify(toSave));
+    }
+    
+    function loadChats() {
+        const saved = localStorage.getItem('tsarev_chats');
+        if (saved) {
+            try {
+                chats = JSON.parse(saved).map(chat => ({
+                    ...chat,
+                    connection: null
+                }));
+            } catch(e) {}
+        }
+        renderChatsList();
+    }
+    
+    function addMessage(chatId, text, isOutgoing) {
+        const chat = chats.find(c => c.id === chatId);
+        if (!chat) return;
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const msg = { id: Date.now(), text, isOutgoing, time };
+        if (!chat.messages) chat.messages = [];
+        chat.messages.push(msg);
+        saveChats();
+        
+        if (currentChatId === chatId) renderMessages();
+        renderChatsList();
+    }
+    
+    function renderMessages() {
+        const chat = chats.find(c => c.id === currentChatId);
+        if (!chat) return;
+        messagesArea.innerHTML = '';
+        (chat.messages || []).forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `message ${msg.isOutgoing ? 'out' : 'in'}`;
+            div.innerHTML = `
+                <div class="bubble">
+                    ${escapeHtml(msg.text)}
+                    <div class="message-time">${msg.time}</div>
+                </div>
+            `;
+            messagesArea.appendChild(div);
+        });
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+    
+    function renderChatsList() {
+        if (chats.length === 0) {
+            chatsListDiv.innerHTML = '<div class="empty-state">Нет диалогов<br>Добавьте друга по ID</div>';
+            return;
+        }
+        chatsListDiv.innerHTML = chats.map(chat => `
+            <div class="chat-item ${currentChatId === chat.id ? 'active' : ''}" data-id="${chat.id}">
+                <div class="chat-avatar">${chat.isBot ? '🤖' : '👤'}</div>
+                <div class="chat-info">
+                    <div class="chat-name">${escapeHtml(chat.name)}</div>
+                    <div class="chat-last-msg">${chat.messages?.length ? (chat.messages[chat.messages.length-1].text.slice(0,35)) : 'Новый чат'}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.chat-item').forEach(el => {
+            el.onclick = () => openChat(el.dataset.id);
+        });
+    }
+    
+    function openChat(chatId) {
+        currentChatId = chatId;
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+            chatTitleSpan.textContent = chat.name;
+            renderMessages();
+            chatsSidebar.classList.add('hidden');
+            chatView.classList.remove('hidden');
+        }
+    }
+    
+    function closeChat() {
+        currentChatId = null;
+        chatsSidebar.classList.remove('hidden');
+        chatView.classList.add('hidden');
+    }
+    
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentChatId) return;
+        const chat = chats.find(c => c.id === currentChatId);
+        if (!chat) return;
+        
+        addMessage(currentChatId, text, true);
+        messageInput.value = '';
+        
+        if (chat.isBot) {
+            setTimeout(() => {
+                const replies = ["😎 Круто!", "🔥🔥🔥", "❤️ Понял!", "🤔 Интересно...", "🚀 Отлично!", "💬 Продолжай!", "✨ Класс!", "🎉 Ура!"];
+                const reply = replies[Math.floor(Math.random() * replies.length)];
+                addMessage(currentChatId, reply, false);
+            }, 600 + Math.random() * 1000);
+        } else if (chat.connection) {
+            chat.connection.send({ type: 'text', text: text });
+        } else if (!isDemoMode) {
+            showToast("⚠️ Нет соединения");
+        }
+    }
+    
+    // ========== ЗВОНКИ ==========
+    async function startCall(isVideo) {
+        if (!currentChatId) return;
+        const chat = chats.find(c => c.id === currentChatId);
+        if (!chat) return;
+        
+        if (chat.isBot) {
+            // Демо-звонок с ботом
+            await startDemoCall(isVideo);
+            return;
+        }
+        
+        if (!chat.connection) {
+            showToast("❌ Нет соединения с собеседником");
+            return;
+        }
+        
+        try {
+            isVideoCall = isVideo;
+            const constraints = { audio: true, video: isVideo };
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            if (isVideo) {
+                localVideo.srcObject = localStream;
+            }
+            
+            // Отправляем сигнал звонка
+            chat.connection.send({ type: 'call_request', video: isVideo });
+            
+            callModal.classList.remove('hidden');
+            isCallActive = true;
+            callStatusSpan.textContent = isVideo ? "📹 Видеозвонок..." : "📞 Аудиозвонок...";
+            
+            if (isVideo) {
+                remoteVideo.style.display = 'block';
+                localVideo.style.display = 'block';
+            } else {
+                remoteVideo.style.display = 'none';
+                localVideo.style.display = 'none';
+            }
+            
+            showToast("📞 Звоним собеседнику...");
+        } catch(e) {
+            showToast("❌ Нет доступа к микрофону/камере");
+        }
+    }
+    
+    async function startDemoCall(isVideo) {
+        try {
+            isVideoCall = isVideo;
+            const constraints = { audio: true, video: isVideo };
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            callModal.classList.remove('hidden');
+            isCallActive = true;
+            
+            if (isVideo) {
+                localVideo.srcObject = localStream;
+                remoteVideo.style.display = 'block';
+                localVideo.style.display = 'block';
+                callStatusSpan.textContent = "🤖 Демо-видеозвонок... (бот тебя видит!)";
+            } else {
+                remoteVideo.style.display = 'none';
+                localVideo.style.display = 'none';
+                callStatusSpan.textContent = "🤖 Демо-звонок... (бот тебя слышит!)";
+            }
+            
+            setTimeout(() => {
+                if (isCallActive) {
+                    const msg = isVideo ? "🤖 Привет! Вижу тебя отлично!" : "🤖 Алло! Слышу тебя прекрасно!";
+                    callStatusSpan.textContent = msg;
+                    const utterance = new SpeechSynthesisUtterance(msg);
+                    utterance.lang = 'ru-RU';
+                    window.speechSynthesis.speak(utterance);
+                    addMessage(currentChatId, msg, false);
+                }
+            }, 1500);
+            
+            showToast("🔊 Демо-звонок активен");
+        } catch(e) {
+            showToast("❌ Нет доступа к микрофону/камере");
+        }
+    }
+    
+    function endCall() {
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+        if (currentCall) {
+            currentCall.close();
+            currentCall = null;
+        }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+        isCallActive = false;
+        callModal.classList.add('hidden');
+        localVideo.srcObject = null;
+        remoteVideo.srcObject = null;
+        showToast("Звонок завершён");
+    }
+    
+    function answerCall(call, isVideo) {
+        if (isCallActive) {
+            call.close();
+            showToast("Уже в звонке");
+            return;
+        }
+        
+        isVideoCall = isVideo;
+        navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
+            .then(stream => {
+                localStream = stream;
+                currentCall = call;
+                call.answer(stream);
+                isCallActive = true;
+                
+                callModal.classList.remove('hidden');
+                if (isVideo) {
+                    localVideo.srcObject = stream;
+                    remoteVideo.style.display = 'block';
+                    localVideo.style.display = 'block';
+                } else {
+                    remoteVideo.style.display = 'none';
+                    localVideo.style.display = 'none';
+                }
+                callStatusSpan.textContent = isVideo ? "📹 Видеозвонок..." : "📞 Аудиозвонок...";
+                
+                call.on('stream', (remoteStream) => {
+                    if (isVideo) {
+                        remoteVideo.srcObject = remoteStream;
+                    }
+                    callStatusSpan.textContent = "🔊 В разговоре";
+                });
+                
+                call.on('close', () => {
+                    endCall();
+                });
+            })
+            .catch(e => {
+                showToast("❌ Ошибка доступа к устройствам");
+                call.close();
+            });
+    }
+    
+    // Добавление друга
+    function addFriend(friendId) {
+        if (friendId === myId) {
+            showToast("❌ Нельзя добавить себя");
+            return;
+        }
+        if (chats.find(c => c.id === friendId)) {
+            showToast("❌ Диалог уже есть");
+            return;
+        }
+        
+        const newChat = {
+            id: friendId,
+            name: friendId.slice(0, 14) + "...",
+            isBot: false,
+            messages: [],
+            connection: null
+        };
+        chats.push(newChat);
+        saveChats();
+        renderChatsList();
+        
+        if (peer && !isDemoMode) {
+            const conn = peer.connect(friendId);
+            conn.on('open', () => {
+                newChat.connection = conn;
+                setupConnection(conn, friendId);
+                showToast(`✅ Подключено к ${friendId.slice(0, 10)}`);
+            });
+            conn.on('error', () => {
+                showToast(`⚠️ ${friendId.slice(0, 10)} не в сети`);
+            });
+        }
+        
+        friendIdInput.value = '';
+    }
+    
+    function addDemoBot() {
+        if (chats.find(c => c.id === 'demo_bot')) {
+            showToast("🤖 Бот уже есть");
+            return;
+        }
+        chats.push({
+            id: 'demo_bot',
+            name: '🤖 Демо-бот',
+            isBot: true,
+            messages: [{ id: 1, text: "Привет! Я бот, можешь мне писать и звонить!", isOutgoing: false, time: "сейчас" }],
+            connection: null
+        });
+        saveChats();
+        renderChatsList();
+        showToast("🤖 Бот добавлен");
+    }
+    
+    function enableDemoMode() {
+        isDemoMode = true;
+        demoBadgeContainer.innerHTML = '<div class="demo-badge">🤖 ДЕМО-РЕЖИМ</div>';
+        addDemoBot();
+        showToast("🤖 Демо-режим включён");
+    }
+    
+    function setupConnection(conn, friendId) {
+        conn.on('data', (data) => {
+            if (data.type === 'text') {
+                addMessage(friendId, data.text, false);
+                if (navigator.vibrate) navigator.vibrate(50);
+                showToast(`📩 От ${friendId.slice(0, 8)}`);
+            } else if (data.type === 'call_request') {
+                showToast(`📞 Входящий звонок от ${friendId.slice(0, 8)}`);
+                answerCall(conn, data.video);
+            }
+        });
+        conn.on('close', () => {
+            showToast(`❌ Связь с ${friendId.slice(0, 8)} потеряна`);
+        });
+    }
+    
+    function initPeer() {
+        peer = new Peer({
+            debug: 0,
+            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+        });
+        
+        peer.on('open', (id) => {
+            myId = id;
+            myIdValueSpan.textContent = id;
+            showToast("✅ Твой ID готов! Отправь другу");
+        });
+        
+        peer.on('connection', (conn) => {
+            const existing = chats.find(c => c.id === conn.peer);
+            if (existing) {
+                existing.connection = conn;
+                setupConnection(conn, conn.peer);
+                showToast(`🔗 ${conn.peer.slice(0, 8)} подключился`);
+            } else {
+                const newChat = {
+                    id: conn.peer,
+                    name: conn.peer.slice(0, 14) + "...",
+                    isBot: false,
+                    messages: [],
+                    connection: conn
+                };
+                chats.push(newChat);
+                setupConnection(conn, conn.peer);
+                saveChats();
+                renderChatsList();
+                showToast(`📱 Новый чат от ${conn.peer.slice(0, 8)}`);
+            }
+        });
+        
+        peer.on('call', (call) => {
+            const chat = chats.find(c => c.id === call.peer);
+            if (chat) {
+                showToast(`📞 Входящий звонок от ${call.peer.slice(0, 8)}`);
+                answerCall(call, false);
+            } else {
+                call.close();
+            }
+        });
+    }
+    
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Обработчики
+    copyIdBtn.onclick = () => {
+        if (myId) {
+            navigator.clipboard.writeText(myId);
+            showToast("✅ ID скопирован!");
+        }
+    };
+    
+    addChatBtn.onclick = () => {
+        const id = friendIdInput.value.trim();
+        if (id) addFriend(id);
+        else showToast("Введите ID друга");
+    };
+    
+    demoModeBtn.onclick = enableDemoMode;
+    backBtn.onclick = closeChat;
+    sendBtn.onclick = sendMessage;
+    messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+    audioCallBtn.onclick = () => startCall(false);
+    videoCallBtn.onclick = () => startCall(true);
+    callEndBtn.onclick = endCall;
+    
+    // Запуск
+    loadChats();
+    initPeer();
+    showToast("✨ Твой ID вверху. Скопируй и отправь другу!");
+</script>
+</body>
+</html>
