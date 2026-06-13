@@ -3,158 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TSAREV Messenger | Постоянный ID</title>
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <title>TSAREV Messenger | Стильный и быстрый</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0e1621;
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
+
+        /* Контейнер приложения */
         .app {
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             height: 100%;
-            max-height: 850px;
-            background: #17212b;
-            border-radius: 28px;
+            max-height: 900px;
+            background: #1e293b;
+            border-radius: 32px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
         }
+
+        /* Шапка */
         .header {
-            background: #1e2a36;
-            padding: 14px 16px;
-            border-bottom: 1px solid #2b3b4c;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 16px 20px;
+            border-bottom: 1px solid #334155;
         }
+
         .my-id-container {
-            background: #0e1621;
-            padding: 10px 14px;
-            border-radius: 40px;
+            background: #0f172a;
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
-        .my-id-label { font-size: 12px; color: #a9b6c2; }
+
+        .my-id-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+
         .my-id-value {
             font-size: 13px;
-            font-weight: bold;
-            color: #5e9cf2;
+            font-weight: 600;
+            background: #1e293b;
+            padding: 6px 12px;
+            border-radius: 40px;
+            color: #38bdf8;
             font-family: monospace;
             word-break: break-all;
             flex: 1;
+            text-align: center;
         }
+
         .copy-btn {
-            background: #5e9cf2;
+            background: #38bdf8;
             border: none;
-            padding: 6px 14px;
-            border-radius: 30px;
-            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: #0f172a;
+            font-weight: 600;
             font-size: 12px;
             cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .demo-badge {
-            background: #e8a020;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            color: white;
-            display: inline-block;
-            margin-top: 8px;
-        }
+
+        .copy-btn:active { transform: scale(0.96); }
+
+        /* Основная область */
         .main-layout { display: flex; flex: 1; overflow: hidden; }
+
+        /* Список чатов */
         .chats-sidebar {
             width: 100%;
-            background: #17212b;
+            background: #1e293b;
             display: flex;
             flex-direction: column;
+            transition: transform 0.25s ease;
         }
         .chats-sidebar.hidden { display: none; }
+
         .chats-header {
-            padding: 16px;
-            border-bottom: 1px solid #2b3b4c;
+            padding: 20px 16px;
+            border-bottom: 1px solid #334155;
         }
-        .chats-header h3 { color: white; margin-bottom: 12px; }
+        .chats-header h3 {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
         .add-chat-form {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
         .add-chat-form input {
             flex: 1;
-            padding: 12px;
-            background: #0e1621;
-            border: 1px solid #2b3b4c;
-            border-radius: 30px;
-            color: white;
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 60px;
+            color: #f1f5f9;
+            font-size: 14px;
             outline: none;
+            transition: 0.2s;
         }
+        .add-chat-form input:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,0.2); }
         .add-chat-form button {
-            background: #5e9cf2;
+            background: #38bdf8;
             border: none;
-            padding: 0 18px;
-            border-radius: 30px;
-            color: white;
+            padding: 0 20px;
+            border-radius: 60px;
+            color: #0f172a;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .demo-btn {
-            background: #e8a020;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            margin-top: 8px;
-        }
+        .add-chat-form button:active { transform: scale(0.96); }
+
+        /* Список диалогов */
         .chats-list {
             flex: 1;
             overflow-y: auto;
-            padding: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .chat-item {
             display: flex;
             align-items: center;
             gap: 14px;
             padding: 14px;
-            background: #1e2a36;
-            margin-bottom: 8px;
-            border-radius: 16px;
+            background: #0f172a;
+            border-radius: 24px;
             cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
         }
-        .chat-item.active { background: #2b5278; }
+        .chat-item:hover { background: #334155; transform: translateX(4px); }
+        .chat-item.active {
+            background: #2d3a52;
+            border-color: #38bdf8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
         .chat-avatar {
-            width: 50px;
-            height: 50px;
-            background: #5e9cf2;
-            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            border-radius: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         .chat-info { flex: 1; }
-        .chat-name { color: white; font-weight: 600; }
-        .chat-last-msg { font-size: 12px; color: #a9b6c2; margin-top: 4px; }
+        .chat-name {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .chat-last-msg {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Окно чата */
         .chat-view {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #17212b;
+            background: #1e293b;
         }
         .chat-view.hidden { display: none; }
+
         .chat-header {
-            padding: 12px 16px;
-            background: #1e2a36;
-            border-bottom: 1px solid #2b3b4c;
+            padding: 14px 16px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -162,155 +220,174 @@
         .back-btn {
             background: none;
             border: none;
-            font-size: 26px;
+            font-size: 28px;
             cursor: pointer;
-            color: #5e9cf2;
-        }
-        .chat-title { flex: 1; color: white; font-weight: 600; }
-        .call-buttons {
-            display: flex;
-            gap: 12px;
-        }
-        .call-btn {
-            background: none;
-            border: none;
-            font-size: 22px;
-            cursor: pointer;
-            color: #5e9cf2;
+            color: #38bdf8;
             padding: 6px;
+            margin-left: -6px;
+            transition: 0.2s;
         }
+        .back-btn:active { transform: scale(0.9); }
+        .chat-title {
+            flex: 1;
+            color: #f1f5f9;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .typing-indicator {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-left: 8px;
+            font-style: italic;
+        }
+
+        /* Сообщения */
         .messages-area {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 20px 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            background-image: radial-gradient(#334155 1px, transparent 1px);
+            background-size: 20px 20px;
         }
         .message {
             max-width: 80%;
-            animation: fadeIn 0.2s ease;
+            animation: slideUp 0.2s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .message.out { align-self: flex-end; }
         .message.in { align-self: flex-start; }
+
         .bubble {
-            padding: 10px 14px;
-            border-radius: 18px;
+            padding: 10px 16px;
+            border-radius: 24px;
             font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            word-break: break-word;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .message.out .bubble {
-            background: #2b5278;
+            background: linear-gradient(135deg, #38bdf8, #3b82f6);
             color: white;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 6px;
         }
         .message.in .bubble {
-            background: #1e2a36;
-            color: white;
-            border-bottom-left-radius: 5px;
+            background: #334155;
+            color: #f1f5f9;
+            border-bottom-left-radius: 6px;
         }
         .message-time {
             font-size: 9px;
-            opacity: 0.6;
-            margin-top: 4px;
+            opacity: 0.7;
+            margin-top: 5px;
             text-align: right;
         }
+
+        /* Панель ввода */
         .input-bar {
-            padding: 12px;
-            background: #1e2a36;
-            border-top: 1px solid #2b3b4c;
+            padding: 12px 16px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
         }
+        .emoji-btn {
+            background: #2d3a52;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.1s;
+            color: white;
+        }
+        .emoji-panel {
+            position: absolute;
+            bottom: 80px;
+            left: 16px;
+            background: #0f172a;
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            border: 1px solid #334155;
+            animation: fadeUp 0.2s;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .emoji-option {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .emoji-option:active { transform: scale(1.2); }
+
         .input-bar input {
             flex: 1;
-            padding: 12px 16px;
-            background: #0e1621;
+            padding: 12px 18px;
+            background: #1e293b;
             border: none;
-            border-radius: 30px;
-            color: white;
+            border-radius: 60px;
+            color: #f1f5f9;
+            font-size: 15px;
             outline: none;
         }
         .send-btn {
-            background: #5e9cf2;
+            background: #38bdf8;
             border: none;
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            font-size: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 40px;
+            font-size: 22px;
             cursor: pointer;
-            color: white;
+            color: #0f172a;
+            transition: 0.1s;
         }
-        .call-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            backdrop-filter: blur(20px);
-        }
-        .call-modal.hidden { display: none; }
-        .remote-video {
-            width: 300px;
-            background: #000;
-            border-radius: 20px;
-            aspect-ratio: 4/3;
-            object-fit: cover;
-        }
-        .local-video {
-            width: 100px;
-            position: absolute;
-            bottom: 100px;
-            right: 20px;
-            border-radius: 16px;
-            border: 2px solid #5e9cf2;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-        }
-        .call-status {
-            color: white;
-            font-size: 16px;
-        }
-        .call-end-btn {
-            background: #ff4444;
-            border: none;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            font-size: 32px;
-            cursor: pointer;
-            color: white;
-        }
+        .send-btn:active { transform: scale(0.92); }
+
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
+            background: #0f172aee;
+            backdrop-filter: blur(12px);
             color: white;
             padding: 8px 20px;
-            border-radius: 40px;
+            border-radius: 60px;
             font-size: 13px;
             z-index: 200;
             opacity: 0;
             transition: 0.2s;
             pointer-events: none;
+            font-weight: 500;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        /* Полоса прокрутки */
+        .messages-area::-webkit-scrollbar {
+            width: 4px;
         }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #a9b6c2;
+        .messages-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -318,11 +395,10 @@
 <div class="app">
     <div class="header">
         <div class="my-id-container">
-            <span class="my-id-label">🆔 ТВОЙ ПОСТОЯННЫЙ ID:</span>
+            <span class="my-id-label">🆔 ТВОЙ ID</span>
             <span class="my-id-value" id="myIdValue">Загрузка...</span>
             <button class="copy-btn" id="copyIdBtn">📋 Копировать</button>
         </div>
-        <div id="demoBadgeContainer"></div>
     </div>
 
     <div class="main-layout">
@@ -330,13 +406,12 @@
             <div class="chats-header">
                 <h3>📱 Диалоги</h3>
                 <div class="add-chat-form">
-                    <input type="text" id="friendIdInput" placeholder="ID друга">
+                    <input type="text" id="friendIdInput" placeholder="Введите ID друга">
                     <button id="addChatBtn">➕ Добавить</button>
                 </div>
-                <button class="demo-btn" id="demoModeBtn">🤖 Тест с ботом</button>
             </div>
             <div class="chats-list" id="chatsList">
-                <div class="empty-state">Нет диалогов<br>Добавьте друга по ID</div>
+                <div class="empty-state" style="text-align:center; padding:40px; color:#94a3b8;">Нет диалогов<br>Добавьте друга по ID</div>
             </div>
         </div>
 
@@ -344,43 +419,39 @@
             <div class="chat-header">
                 <button class="back-btn" id="backBtn">←</button>
                 <div class="chat-title" id="chatTitle">Чат</div>
-                <div class="call-buttons">
-                    <button class="call-btn" id="audioCallBtn">📞</button>
-                    <button class="call-btn" id="videoCallBtn">📹</button>
-                </div>
+                <div class="typing-indicator" id="typingStatus"></div>
             </div>
             <div class="messages-area" id="messagesArea"></div>
             <div class="input-bar">
+                <button class="emoji-btn" id="emojiBtn">😊</button>
                 <input type="text" id="messageInput" placeholder="Сообщение..." autocomplete="off">
                 <button class="send-btn" id="sendBtn">➤</button>
             </div>
         </div>
     </div>
 </div>
-
-<div id="callModal" class="call-modal hidden">
-    <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-    <video id="localVideo" class="local-video" autoplay playsinline muted></video>
-    <div class="call-status" id="callStatus">Звонок...</div>
-    <button class="call-end-btn" id="callEndBtn">📞</button>
-</div>
-
 <div id="toast" class="toast"></div>
 
 <script>
-    // ========== TSAREV МЕССЕНДЖЕР С ПОСТОЯННЫМ ID ==========
-    let peer = null;
+    // ========== ТВОЙ FIREBASE КОНФИГ ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyC9aW0kJXaHKNwBfeR0nDCJ_YOY2h0EDv0",
+        authDomain: "tsarev-messenger.firebaseapp.com",
+        projectId: "tsarev-messenger",
+        storageBucket: "tsarev-messenger.firebasestorage.app",
+        messagingSenderId: "200700111814",
+        appId: "1:200700111814:web:e8a41cea06ac00b523a0c7"
+    };
+    // ========================================
+
+    let db = null;
     let myId = null;
-    let isDemoMode = false;
     let currentChatId = null;
     let chats = [];
-    
-    // Для звонков
-    let localStream = null;
-    let currentCall = null;
-    let isCallActive = false;
-    let isVideoCall = false;
-    
+    let currentMessagesUnsubscribe = null;
+    let typingTimeout = null;
+    let notificationSound = null;
+
     // DOM
     const myIdValueSpan = document.getElementById('myIdValue');
     const copyIdBtn = document.getElementById('copyIdBtn');
@@ -391,91 +462,170 @@
     const chatTitleSpan = document.getElementById('chatTitle');
     const friendIdInput = document.getElementById('friendIdInput');
     const addChatBtn = document.getElementById('addChatBtn');
-    const demoModeBtn = document.getElementById('demoModeBtn');
     const backBtn = document.getElementById('backBtn');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    const audioCallBtn = document.getElementById('audioCallBtn');
-    const videoCallBtn = document.getElementById('videoCallBtn');
-    const demoBadgeContainer = document.getElementById('demoBadgeContainer');
+    const emojiBtn = document.getElementById('emojiBtn');
+    const typingStatusSpan = document.getElementById('typingStatus');
     const toastEl = document.getElementById('toast');
-    const callModal = document.getElementById('callModal');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const localVideo = document.getElementById('localVideo');
-    const callStatusSpan = document.getElementById('callStatus');
-    const callEndBtn = document.getElementById('callEndBtn');
-    
+
     function showToast(msg) {
         toastEl.textContent = msg;
         toastEl.style.opacity = '1';
         setTimeout(() => toastEl.style.opacity = '0', 2000);
     }
-    
-    // Генерация постоянного ID (сохраняется в localStorage)
-    function getOrCreateUserId() {
-        let savedId = localStorage.getItem('tsarev_permanent_id');
-        if (!savedId) {
-            savedId = 'user_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-            localStorage.setItem('tsarev_permanent_id', savedId);
+
+    function playNotification() {
+        if (!notificationSound) {
+            notificationSound = new Audio("data:audio/wav;base64,U3RlYWx0aCBzb3VuZCBub3RpZmljYXRpb24=");
+            notificationSound.volume = 0.5;
         }
-        return savedId;
+        notificationSound.play().catch(e => console.log("notify"));
     }
-    
+
+    function generateId() {
+        return 'user_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    }
+
     function saveChats() {
-        const toSave = chats.map(chat => ({
-            id: chat.id,
-            name: chat.name,
-            isBot: chat.isBot
-        }));
-        localStorage.setItem('tsarev_chats', JSON.stringify(toSave));
+        const toSave = chats.map(chat => ({ id: chat.id, name: chat.name }));
+        localStorage.setItem('tsarev_chats_fb', JSON.stringify(toSave));
     }
-    
-    function loadChats() {
-        const saved = localStorage.getItem('tsarev_chats');
+
+    function loadChatsFromStorage() {
+        const saved = localStorage.getItem('tsarev_chats_fb');
         if (saved) {
-            try {
-                chats = JSON.parse(saved);
-            } catch(e) {}
+            try { chats = JSON.parse(saved); } catch(e) {}
         }
         renderChatsList();
     }
-    
-    function addMessage(chatId, text, isOutgoing) {
-        const chat = chats.find(c => c.id === chatId);
-        if (!chat) return;
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        if (!chat.messages) chat.messages = [];
-        chat.messages.push({ id: Date.now(), text, isOutgoing, time });
-        saveChats();
-        
-        if (currentChatId === chatId) renderMessages();
-        renderChatsList();
+
+    // Отправка "печатает..."
+    async function sendTyping(chatId, isTyping) {
+        if (!db) return;
+        const typingRef = db.collection('chats').doc(chatId).collection('status').doc('typing');
+        await typingRef.set({ userId: myId, typing: isTyping, timestamp: Date.now() }, { merge: true });
     }
-    
-    function renderMessages() {
-        const chat = chats.find(c => c.id === currentChatId);
-        if (!chat) return;
-        messagesArea.innerHTML = '';
-        (chat.messages || []).forEach(msg => {
-            const div = document.createElement('div');
-            div.className = `message ${msg.isOutgoing ? 'out' : 'in'}`;
-            div.innerHTML = `<div class="bubble">${escapeHtml(msg.text)}<div class="message-time">${msg.time}</div></div>`;
-            messagesArea.appendChild(div);
+
+    function listenTyping(chatId) {
+        if (!db) return;
+        const typingRef = db.collection('chats').doc(chatId).collection('status').doc('typing');
+        typingRef.onSnapshot(doc => {
+            if (doc.exists && doc.data().typing && doc.data().userId !== myId) {
+                typingStatusSpan.textContent = 'печатает...';
+                setTimeout(() => { if (typingStatusSpan.textContent === 'печатает...') typingStatusSpan.textContent = ''; }, 2000);
+            } else {
+                typingStatusSpan.textContent = '';
+            }
         });
+    }
+
+    async function sendMessageToFirestore(chatId, text) {
+        if (!db) return;
+        await db.collection('chats').doc(chatId).collection('messages').add({
+            text: text,
+            senderId: myId,
+            timestamp: Date.now()
+        });
+        await db.collection('chats').doc(chatId).set({
+            lastMsg: text.slice(0, 50),
+            lastTime: Date.now(),
+            participants: [myId, chatId.split('_').slice(1).join('_')]
+        }, { merge: true });
+    }
+
+    function listenMessages(chatId) {
+        if (currentMessagesUnsubscribe) currentMessagesUnsubscribe();
+        if (!db) return;
+        listenTyping(chatId);
+        const messagesRef = db.collection('chats').doc(chatId).collection('messages');
+        currentMessagesUnsubscribe = messagesRef.orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+            const wasAtBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight < 50;
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added') {
+                    const msg = change.doc.data();
+                    const isOutgoing = msg.senderId === myId;
+                    if (!isOutgoing && document.hidden === false) playNotification();
+                    renderMessage(msg.text, isOutgoing, msg.timestamp);
+                }
+            });
+            if (wasAtBottom) messagesArea.scrollTop = messagesArea.scrollHeight;
+        });
+    }
+
+    function renderMessage(text, isOutgoing, timestamp) {
+        const div = document.createElement('div');
+        div.className = `message ${isOutgoing ? 'out' : 'in'}`;
+        const time = timestamp ? new Date(timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+        div.innerHTML = `<div class="bubble">${escapeHtml(text)}<div class="message-time">${time}</div></div>`;
+        messagesArea.appendChild(div);
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
-    
+
+    async function createOrGetChat(friendId) {
+        if (friendId === myId) { showToast("Нельзя добавить себя"); return null; }
+        const participants = [myId, friendId].sort();
+        const chatId = `chat_${participants[0]}_${participants[1]}`;
+        const chatRef = db.collection('chats').doc(chatId);
+        const doc = await chatRef.get();
+        if (!doc.exists) {
+            await chatRef.set({
+                participants: participants,
+                createdAt: Date.now(),
+                lastMsg: "Чат создан"
+            });
+        }
+        if (!chats.find(c => c.id === chatId)) {
+            chats.push({ id: chatId, name: friendId.slice(0,14)+"..." });
+            saveChats();
+            renderChatsList();
+        }
+        return chatId;
+    }
+
+    function openChat(chatId) {
+        if (currentMessagesUnsubscribe) currentMessagesUnsubscribe();
+        currentChatId = chatId;
+        const chat = chats.find(c => c.id === chatId);
+        if (chat) {
+            chatTitleSpan.textContent = chat.name;
+            messagesArea.innerHTML = '';
+            listenMessages(chatId);
+            chatsSidebar.classList.add('hidden');
+            chatView.classList.remove('hidden');
+        }
+    }
+
+    function closeChat() {
+        if (currentMessagesUnsubscribe) {
+            currentMessagesUnsubscribe();
+            currentMessagesUnsubscribe = null;
+        }
+        currentChatId = null;
+        chatsSidebar.classList.remove('hidden');
+        chatView.classList.add('hidden');
+        typingStatusSpan.textContent = '';
+    }
+
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text || !currentChatId || !db) return;
+        await sendMessageToFirestore(currentChatId, text);
+        messageInput.value = '';
+        await sendTyping(currentChatId, false);
+    }
+
     function renderChatsList() {
         if (chats.length === 0) {
-            chatsListDiv.innerHTML = '<div class="empty-state">Нет диалогов<br>Добавьте друга по ID</div>';
+            chatsListDiv.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; color:#94a3b8;">Нет диалогов<br>Добавьте друга по ID</div>';
             return;
         }
         chatsListDiv.innerHTML = chats.map(chat => `
             <div class="chat-item ${currentChatId === chat.id ? 'active' : ''}" data-id="${chat.id}">
-                <div class="chat-avatar">${chat.isBot ? '🤖' : '👤'}</div>
+                <div class="chat-avatar">👤</div>
                 <div class="chat-info">
                     <div class="chat-name">${escapeHtml(chat.name)}</div>
-                    <div class="chat-last-msg">${chat.messages?.length ? (chat.messages[chat.messages.length-1].text.slice(0,35)) : 'Новый чат'}</div>
+                    <div class="chat-last-msg">Нажмите для чата</div>
                 </div>
             </div>
         `).join('');
@@ -483,209 +633,7 @@
             el.onclick = () => openChat(el.dataset.id);
         });
     }
-    
-    function openChat(chatId) {
-        currentChatId = chatId;
-        const chat = chats.find(c => c.id === chatId);
-        if (chat) {
-            chatTitleSpan.textContent = chat.name;
-            renderMessages();
-            chatsSidebar.classList.add('hidden');
-            chatView.classList.remove('hidden');
-        }
-    }
-    
-    function closeChat() {
-        currentChatId = null;
-        chatsSidebar.classList.remove('hidden');
-        chatView.classList.add('hidden');
-    }
-    
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (!text || !currentChatId) return;
-        const chat = chats.find(c => c.id === currentChatId);
-        if (!chat) return;
-        
-        addMessage(currentChatId, text, true);
-        messageInput.value = '';
-        
-        if (chat.isBot) {
-            setTimeout(() => {
-                const replies = ["😎 Круто!", "🔥🔥🔥", "❤️ Понял!", "🤔 Интересно...", "🚀 Отлично!", "💬 Продолжай!"];
-                const reply = replies[Math.floor(Math.random() * replies.length)];
-                addMessage(currentChatId, reply, false);
-            }, 600 + Math.random() * 1000);
-        } else if (chat.connection) {
-            chat.connection.send({ type: 'text', text: text });
-        } else if (!isDemoMode) {
-            showToast("⚠️ Нет соединения");
-        }
-    }
-    
-    // Звонки (демо)
-    async function startCall(isVideo) {
-        if (!currentChatId) return;
-        const chat = chats.find(c => c.id === currentChatId);
-        if (!chat) return;
-        
-        if (chat.isBot) {
-            try {
-                const constraints = { audio: true, video: isVideo };
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                callModal.classList.remove('hidden');
-                isCallActive = true;
-                isVideoCall = isVideo;
-                if (isVideo) {
-                    localVideo.srcObject = localStream;
-                    localVideo.style.display = 'block';
-                    remoteVideo.style.display = 'block';
-                } else {
-                    localVideo.style.display = 'none';
-                    remoteVideo.style.display = 'none';
-                }
-                callStatusSpan.textContent = isVideo ? "🤖 Демо-видеозвонок..." : "🤖 Демо-звонок...";
-                setTimeout(() => {
-                    const msg = isVideo ? "🤖 Вижу тебя!" : "🤖 Алло! Слышу тебя!";
-                    callStatusSpan.textContent = msg;
-                    const utterance = new SpeechSynthesisUtterance(msg);
-                    utterance.lang = 'ru-RU';
-                    window.speechSynthesis.speak(utterance);
-                    addMessage(currentChatId, msg, false);
-                }, 1500);
-                showToast("📞 Демо-звонок активен");
-            } catch(e) {
-                showToast("❌ Нет доступа к камере/микрофону");
-            }
-        } else {
-            showToast("Реальный звонок в разработке");
-        }
-    }
-    
-    function endCall() {
-        if (localStream) localStream.getTracks().forEach(t => t.stop());
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        isCallActive = false;
-        callModal.classList.add('hidden');
-        localStream = null;
-        showToast("Звонок завершён");
-    }
-    
-    function addFriend(friendId) {
-        if (friendId === myId) {
-            showToast("❌ Нельзя добавить себя");
-            return;
-        }
-        if (chats.find(c => c.id === friendId)) {
-            showToast("❌ Чат уже существует");
-            return;
-        }
-        
-        const newChat = {
-            id: friendId,
-            name: friendId.slice(0, 14) + "...",
-            isBot: false,
-            messages: [],
-            connection: null
-        };
-        chats.push(newChat);
-        saveChats();
-        renderChatsList();
-        
-        if (peer && !isDemoMode) {
-            const conn = peer.connect(friendId);
-            conn.on('open', () => {
-                newChat.connection = conn;
-                setupConnection(conn, friendId);
-                showToast(`✅ Подключено к ${friendId.slice(0, 10)}`);
-            });
-            conn.on('error', () => {
-                showToast(`⚠️ ${friendId.slice(0, 10)} не в сети`);
-            });
-        }
-    }
-    
-    function addDemoBot() {
-        if (chats.find(c => c.id === 'demo_bot')) {
-            showToast("🤖 Бот уже есть");
-            return;
-        }
-        chats.push({
-            id: 'demo_bot',
-            name: '🤖 Демо-бот',
-            isBot: true,
-            messages: [{ id: 1, text: "Привет! Я бот, у меня постоянный ID не меняется!", isOutgoing: false, time: "сейчас" }],
-            connection: null
-        });
-        saveChats();
-        renderChatsList();
-        showToast("🤖 Бот добавлен");
-    }
-    
-    function enableDemoMode() {
-        isDemoMode = true;
-        demoBadgeContainer.innerHTML = '<div class="demo-badge">🤖 ДЕМО-РЕЖИМ</div>';
-        addDemoBot();
-        showToast("🤖 Демо-режим включён");
-    }
-    
-    function setupConnection(conn, friendId) {
-        conn.on('data', (data) => {
-            if (data.type === 'text') {
-                addMessage(friendId, data.text, false);
-                if (navigator.vibrate) navigator.vibrate(50);
-                showToast(`📩 От ${friendId.slice(0, 8)}`);
-            }
-        });
-        conn.on('close', () => {
-            showToast(`❌ Связь с ${friendId.slice(0, 8)} потеряна`);
-        });
-    }
-    
-    function initPeer() {
-        // Постоянный ID пользователя
-        const permanentId = getOrCreateUserId();
-        
-        peer = new Peer(permanentId, {
-            debug: 0,
-            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
-        });
-        
-        peer.on('open', (id) => {
-            myId = id;
-            myIdValueSpan.textContent = id;
-            showToast("✅ Твой ID постоянный! Он никогда не изменится");
-        });
-        
-        peer.on('connection', (conn) => {
-            const existing = chats.find(c => c.id === conn.peer);
-            if (existing) {
-                existing.connection = conn;
-                setupConnection(conn, conn.peer);
-                showToast(`🔗 ${conn.peer.slice(0, 8)} подключился`);
-            } else {
-                const newChat = {
-                    id: conn.peer,
-                    name: conn.peer.slice(0, 14) + "...",
-                    isBot: false,
-                    messages: [],
-                    connection: conn
-                };
-                chats.push(newChat);
-                setupConnection(conn, conn.peer);
-                saveChats();
-                renderChatsList();
-                showToast(`📱 Новый чат от ${conn.peer.slice(0, 8)}`);
-            }
-        });
-        
-        peer.on('error', (err) => {
-            if (err.type === 'peer-unavailable') {
-                showToast("❌ Друг не в сети");
-            }
-        });
-    }
-    
+
     function escapeHtml(str) {
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
@@ -694,34 +642,111 @@
             return m;
         });
     }
-    
-    // Обработчики событий
+
+    // Эмодзи пикер
+    let emojiPanel = null;
+    function showEmojiPicker() {
+        if (emojiPanel) { emojiPanel.remove(); emojiPanel = null; return; }
+        const panel = document.createElement('div');
+        panel.className = 'emoji-panel';
+        const emojis = ['😀', '😂', '🥰', '😎', '🔥', '❤️', '👍', '🎉', '✨', '💯', '🤣', '😢', '🥳', '🙏', '💬', '📱'];
+        emojis.forEach(emo => {
+            const btn = document.createElement('button');
+            btn.textContent = emo;
+            btn.className = 'emoji-option';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const input = messageInput;
+                const start = input.selectionStart;
+                input.value = input.value.slice(0, start) + emo + input.value.slice(start);
+                input.focus();
+                input.setSelectionRange(start + emo.length, start + emo.length);
+                panel.remove();
+                emojiPanel = null;
+            };
+            panel.appendChild(btn);
+        });
+        document.querySelector('.app').appendChild(panel);
+        emojiPanel = panel;
+        setTimeout(() => {
+            document.addEventListener('click', function closePanel(e) {
+                if (panel && !panel.contains(e.target) && e.target !== emojiBtn) {
+                    panel.remove();
+                    emojiPanel = null;
+                    document.removeEventListener('click', closePanel);
+                }
+            });
+        }, 10);
+    }
+
+    // Инициализация Firebase
+    async function initFirebase() {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            let savedId = localStorage.getItem('tsarev_myid_fb');
+            if (!savedId) {
+                savedId = generateId();
+                localStorage.setItem('tsarev_myid_fb', savedId);
+            }
+            myId = savedId;
+            myIdValueSpan.textContent = myId;
+            loadChatsFromStorage();
+            // Слушаем новые чаты
+            db.collection('chats')
+                .where('participants', 'array-contains', myId)
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            const chatId = change.doc.id;
+                            const other = data.participants.find(p => p !== myId);
+                            if (other && !chats.find(c => c.id === chatId)) {
+                                chats.push({ id: chatId, name: other.slice(0,14)+"..." });
+                                saveChats();
+                                renderChatsList();
+                                showToast(`📱 Новый диалог с ${other.slice(0,10)}`);
+                            }
+                        }
+                    });
+                });
+            showToast("✨ Мессенджер готов! Твой ID постоянный.");
+        } catch(e) {
+            console.error(e);
+            showToast("❌ Ошибка подключения к Firebase");
+        }
+    }
+
+    // Обработчики
     copyIdBtn.onclick = () => {
         if (myId) {
             navigator.clipboard.writeText(myId);
-            showToast("✅ ID скопирован! Он всегда одинаковый");
+            showToast("✅ ID скопирован! Отправь другу.");
         }
     };
-    
-    addChatBtn.onclick = () => {
-        const id = friendIdInput.value.trim();
-        if (id) addFriend(id);
-        else showToast("Введите ID друга");
-        friendIdInput.value = '';
+    addChatBtn.onclick = async () => {
+        const friendId = friendIdInput.value.trim();
+        if (friendId && db) {
+            const chatId = await createOrGetChat(friendId);
+            if (chatId) openChat(chatId);
+            friendIdInput.value = '';
+        } else if (!friendId) showToast("Введите ID друга");
     };
-    
-    demoModeBtn.onclick = enableDemoMode;
     backBtn.onclick = closeChat;
     sendBtn.onclick = sendMessage;
-    messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-    audioCallBtn.onclick = () => startCall(false);
-    videoCallBtn.onclick = () => startCall(true);
-    callEndBtn.onclick = endCall;
-    
-    // Запуск
-    loadChats();
-    initPeer();
-    showToast("✨ Твой ID постоянный! Скопируй один раз и отправь другу");
+    messageInput.onkeypress = (e) => {
+        if (e.key === 'Enter') sendMessage();
+        else {
+            if (currentChatId && db) sendTyping(currentChatId, true);
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                if (currentChatId) sendTyping(currentChatId, false);
+            }, 1000);
+        }
+    };
+    emojiBtn.onclick = (e) => { e.stopPropagation(); showEmojiPicker(); };
+
+    initFirebase();
 </script>
 </body>
 </html>
